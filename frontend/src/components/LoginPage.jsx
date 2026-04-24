@@ -1,0 +1,45 @@
+import { useState } from 'react';
+import { useAuth } from '../context/AuthContext';
+
+export default function LoginPage({ onSwitch }) {
+  const { login } = useAuth();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setError('');
+    try {
+      await login({ email, password });
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <h2 className="text-2xl font-semibold">Login</h2>
+      {error && <div className="rounded-2xl bg-red-500/20 px-4 py-3 text-red-200">{error}</div>}
+      <form className="space-y-4" onSubmit={handleSubmit}>
+        <label className="block space-y-2 text-sm text-slate-300">
+          Email
+          <input value={email} onChange={(e) => setEmail(e.target.value)} type="email" placeholder="Enter email" />
+        </label>
+        <label className="block space-y-2 text-sm text-slate-300">
+          Password
+          <input value={password} onChange={(e) => setPassword(e.target.value)} type="password" placeholder="Enter password" />
+        </label>
+        <button type="submit" className="w-full rounded-2xl bg-cyan-500 px-4 py-3 font-semibold text-slate-950 hover:bg-cyan-400">
+          Login
+        </button>
+      </form>
+      <p className="text-sm text-slate-400">
+        Don't have an account?{' '}
+        <button onClick={onSwitch} className="text-cyan-300 hover:text-cyan-100">
+          Sign up
+        </button>
+      </p>
+    </div>
+  );
+}
