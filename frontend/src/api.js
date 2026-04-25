@@ -1,4 +1,4 @@
-const API_BASE = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
+const API_BASE = import.meta.env.VITE_BACKEND_URL || '';
 
 const request = async (path, options = {}) => {
   const token = localStorage.getItem('mealToken');
@@ -24,3 +24,9 @@ export const getAllMeals = () => request('/api/meals/all');
 export const getBazarItems = () => request('/api/bazar');
 export const addBazarItem = (payload) => request('/api/bazar', { method: 'POST', body: JSON.stringify(payload) });
 export const getProfile = () => request('/api/auth/me');
+export const forgotPassword = (payload) => request('/api/auth/forgot-password', { method: 'POST', body: JSON.stringify(payload) });
+export const resetPassword = (payload) => request('/api/auth/reset-password', { method: 'POST', body: JSON.stringify(payload) });
+export const deleteAllUsers = () => request('/api/auth/users', { method: 'DELETE' });
+export const getUsers = () => request('/api/auth/users');
+export const createUser = (payload) => request('/api/auth/users', { method: 'POST', body: JSON.stringify(payload) });
+export const deleteUser = (userId) => request(`/api/auth/users/${userId}`, { method: 'DELETE' });

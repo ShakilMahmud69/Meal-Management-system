@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { getDashboard, updateMeal } from '../api';
+import { getDashboard, updateMeal, createUser, deleteUser } from '../api';
 import MealTable from './MealTable';
 import SummaryCards from './SummaryCards';
 import BazarForm from './BazarForm';
@@ -28,6 +28,10 @@ export default function Dashboard() {
   const [dashboard, setDashboard] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [memberName, setMemberName] = useState('');
+  const [memberEmail, setMemberEmail] = useState('');
+  const [memberPassword, setMemberPassword] = useState('');
+  const [memberMessage, setMemberMessage] = useState('');
   const [selectedMonth, setSelectedMonth] = useState(getMonthKey(new Date()));
 
   const loadDashboard = async () => {
@@ -100,6 +104,55 @@ export default function Dashboard() {
     }
   };
 
+  const handleAddMember = async (event) => {
+    event.preventDefault();
+    setMemberMessage('');
+    setError('');
+
+    try {
+      await createUser({ name: memberName, email: memberEmail, password: memberPassword });
+      setMemberMessage('New mess member added successfully.');
+      setMemberName('');
+      setMemberEmail('');
+      setMemberPassword('');
+      await loadDashboard();
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  const handleRemoveMember = async (userId) => {
+    if (!window.confirm('Remove this mess member?')) {
+      return;
+    }
+    setMemberMessage('');
+    setError('');
+
+    try {
+      await deleteUser(userId);
+      setMemberMessage('Member removed successfully.');
+      await loadDashboard();
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  const handleDeleteAllMembers = async () => {
+    if (!window.confirm('Delete all non-admin members? This cannot be undone.')) {
+      return;
+    }
+    setMemberMessage('');
+    setError('');
+
+    try {
+      await deleteAllUsers();
+      setMemberMessage('All non-admin members have been deleted.');
+      await loadDashboard();
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
   const handleChangeMonth = (delta) => {
     const date = new Date(selectedMonth.year, selectedMonth.month + delta, 1);
     setSelectedMonth(getMonthKey(date));
@@ -118,13 +171,12 @@ export default function Dashboard() {
         </div>
         <div className="flex flex-col gap-2 sm:flex-row">
           <span className="rounded-3xl bg-slate-800 px-4 py-3 text-sm text-slate-300">Signed in as {user.name}</span>
+          {user.isAdmin && <span className="rounded-3xl bg-cyan-500 px-4 py-3 text-sm font-semibold text-slate-950">Admin</span>}
           <button onClick={logout} className="rounded-3xl bg-rose-500 px-4 py-3 text-sm font-semibold text-white hover:bg-rose-400">
             Logout
           </button>
         </div>
       </div>
-
-      {error && <div className="mb-6 rounded-3xl bg-red-500/20 p-4 text-red-200">{error}</div>}
 
       <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div className="rounded-3xl bg-slate-900 px-5 py-4 shadow-xl">
@@ -162,10 +214,10 @@ export default function Dashboard() {
             <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
               <div>
                 <h2 className="text-xl font-semibold text-white">Meal table</h2>
-                <p className="text-slate-400">Click on your own user cells to toggle lunch/dinner values.</p>
+                <p className="text-slate-400">Click on your own user cells to toggle lunch/dinner values. Admin can edit any member's meals.</p>
               </div>
               <div className="rounded-3xl bg-slate-800 px-4 py-3 text-sm text-slate-300">
-                Editable only for {user.name}
+                {user.isAdmin ? 'Admin can edit all members' : `Editable only for ${user.name}`}
               </div>
             </div>
             <MealTable
@@ -179,6 +231,70 @@ export default function Dashboard() {
         </div>
 
         <div className="space-y-6">
+          {user.isAdmin && (
+            <div className="rounded-3xl bg-slate-900 p-6 shadow-xl">
+              <div className="mb-4 flex items-center justify-between gap-4">
+                <div>
+                  <h2 className="text-xl font-semibold text-white">Member management</h2>
+                  <p className="text-slate-400">Add or remove mess members from the system.</p>
+                </div>
+              </div>
+
+              {memberMessage && <div className="mb-4 rounded-3xl bg-emerald-500/20 p-4 text-emerald-200">{memberMessage}</div>}
+              {error && <div className="mb-4 rounded-3xl bg-red-500/20 p-4 text-red-200">{error}</div>}
+
+              <form className="space-y-4" onSubmit={handleAddMember}>
+                <label className="block space-y-2 text-sm text-slate-300">
+                  Name
+                  <input value={memberName} onChange={(e) => setMemberName(e.target.value)} type="text" placeholder="Member name" />
+                </label>
+                <label className="block space-y-2 text-sm text-slate-300">
+                  Email
+                  <input value={memberEmail} onChange={(e) => setMemberEmail(e.target.value)} type="email" placeholder="Member email" />
+                </label>
+                <label className="block space-y-2 text-sm text-slate-300">
+                  Password
+                  <input value={memberPassword} onChange={(e) => setMemberPassword(e.target.value)} type="password" placeholder="Temporary password" />
+                </label>
+                <button type="submit" className="w-full rounded-2xl bg-cyan-500 px-4 py-3 font-semibold text-slate-950 hover:bg-cyan-400">
+                  Add member
+                </button>
+              </form>
+
+              <div className="mt-6 flex flex-col gap-4 rounded-3xl border border-slate-700 bg-slate-800 p-4">
+                <div className="flex items-center justify-between gap-4">
+                  <div>
+                    <h3 className="text-lg font-semibold text-white">Current members</h3>
+                    <p className="text-slate-400 text-sm">You can remove members one by one or delete all non-admin members.</p>
+                  </div>
+                  <button
+                    onClick={handleDeleteAllMembers}
+                    className="rounded-2xl bg-rose-500 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-400"
+                  >
+                    Delete all members
+                  </button>
+                </div>
+                <div className="space-y-3">
+                  {dashboard.users.map((member) => (
+                    <div key={member._id} className="flex flex-wrap items-center justify-between gap-3 rounded-3xl bg-slate-900 p-4">
+                      <div>
+                        <p className="font-semibold text-white">{member.name}</p>
+                        <p className="text-slate-400 text-sm">{member.email}</p>
+                      </div>
+                      <button
+                        onClick={() => handleRemoveMember(member._id)}
+                        disabled={member._id === user._id}
+                        className="rounded-2xl bg-rose-500 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-400 disabled:cursor-not-allowed disabled:bg-slate-700"
+                      >
+                        {member._id === user._id ? 'Cannot remove self' : 'Remove'}
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
           <MealDateForm onCreated={loadDashboard} defaultDate={monthDays[0]} />
           <BazarDetails bazars={monthlyBazars} mealRate={monthlyMealRate} totalCost={monthlyTotalCost} totalMeals={monthlyTotalMeals} />
         </div>
