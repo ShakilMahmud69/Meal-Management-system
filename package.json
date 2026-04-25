@@ -7,11 +7,12 @@
     "frontend"
   ],
   "devDependencies": {
-    "concurrently": "^8.2.2"
+    "concurrently": "^8.2.2",
+    "cross-env": "^7.0.3"
   },
   "scripts": {
     "bootstrap": "npm install --workspaces",
-    "dev": "concurrently \"npm --workspace backend run dev\" \"npm --workspace frontend run dev\"",
+    "dev": "cross-env VITE_BACKEND_URL=http://localhost:5001 PORT=5001 concurrently \"npm --workspace backend run dev\" \"npm --workspace frontend run dev\"",
     "backend": "npm --workspace backend run dev",
     "frontend": "npm --workspace frontend run dev"
   }

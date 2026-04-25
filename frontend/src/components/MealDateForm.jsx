@@ -1,8 +1,12 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { createMealDate } from '../api';
 
-export default function MealDateForm({ onCreated }) {
-  const [date, setDate] = useState('');
+export default function MealDateForm({ onCreated, defaultDate = '' }) {
+  const [date, setDate] = useState(defaultDate);
+
+  useEffect(() => {
+    setDate(defaultDate || '');
+  }, [defaultDate]);
   const [error, setError] = useState('');
   const [status, setStatus] = useState('');
 

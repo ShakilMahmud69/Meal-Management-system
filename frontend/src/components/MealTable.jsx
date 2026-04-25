@@ -22,8 +22,9 @@ const getTotals = (dates, users, cells) => {
   });
 };
 
-export default function MealTable({ users, meals, currentUser, onToggle }) {
-  const { dates, cells } = getDateRows(meals);
+export default function MealTable({ users, monthDates, meals, currentUser, onToggle }) {
+  const { dates: mealDates, cells } = getDateRows(meals);
+  const dates = monthDates.length > 0 ? monthDates : mealDates;
   const totals = getTotals(dates, users, cells);
 
   return (
@@ -50,7 +51,7 @@ export default function MealTable({ users, meals, currentUser, onToggle }) {
           {dates.length === 0 && (
             <tr>
               <td colSpan={1 + users.length * 2} className="p-6 text-center text-slate-400">
-                No meal records yet.
+                No meal records yet for this month.
               </td>
             </tr>
           )}
