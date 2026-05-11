@@ -67,7 +67,8 @@ export default function MealTable({ users, monthDates, meals, currentUser, onTog
                     <button
                       disabled={!canEdit}
                       onClick={() => onToggle(date, 'lunch', meal.lunch, userId)}
-                      className={`mx-auto inline-flex h-10 w-20 items-center justify-center rounded-2xl font-semibold ${
+                      data-tooltip={`${user.name} - Lunch`}
+                      className={`meal-tooltip mx-auto inline-flex h-10 w-20 items-center justify-center rounded-2xl font-semibold ${
                         meal.lunch ? 'bg-emerald-500 text-slate-950' : 'bg-rose-500 text-white'
                       } ${canEdit ? 'cursor-pointer hover:brightness-110' : 'cursor-not-allowed opacity-60'}`}
                     >
@@ -78,7 +79,8 @@ export default function MealTable({ users, monthDates, meals, currentUser, onTog
                     <button
                       disabled={!canEdit}
                       onClick={() => onToggle(date, 'dinner', meal.dinner, userId)}
-                      className={`mx-auto inline-flex h-10 w-20 items-center justify-center rounded-2xl font-semibold ${
+                      data-tooltip={`${user.name} - Dinner`}
+                      className={`meal-tooltip mx-auto inline-flex h-10 w-20 items-center justify-center rounded-2xl font-semibold ${
                         meal.dinner ? 'bg-emerald-500 text-slate-950' : 'bg-rose-500 text-white'
                       } ${canEdit ? 'cursor-pointer hover:brightness-110' : 'cursor-not-allowed opacity-60'}`}
                     >

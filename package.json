@@ -12,7 +12,7 @@
   },
   "scripts": {
     "bootstrap": "npm install --workspaces",
-    "dev": "cross-env VITE_BACKEND_URL=http://localhost:5001 PORT=5001 concurrently \"npm --workspace backend run dev\" \"npm --workspace frontend run dev\"",
+    "dev": "cross-env VITE_BACKEND_URL=http://localhost:5000 PORT=5001 concurrently \"cross-env PORT=5000 npm --workspace backend run dev\" \"npm --workspace frontend run dev\"",
     "backend": "npm --workspace backend run dev",
     "frontend": "npm --workspace frontend run dev"
   }

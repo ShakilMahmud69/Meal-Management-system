@@ -30,3 +30,4 @@ export const deleteAllUsers = () => request('/api/auth/users', { method: 'DELETE
 export const getUsers = () => request('/api/auth/users');
 export const createUser = (payload) => request('/api/auth/users', { method: 'POST', body: JSON.stringify(payload) });
 export const deleteUser = (userId) => request(`/api/auth/users/${userId}`, { method: 'DELETE' });
+export const getHistory = () => request('/api/history');

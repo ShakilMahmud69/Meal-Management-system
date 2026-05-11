@@ -22,8 +22,14 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
-  const login = async (payload) => {
+  const login = async (payload, isAdminLogin = false) => {
     const data = await loginUser(payload);
+    
+    // Check if admin login is required but user is not admin
+    if (isAdminLogin && !data.isAdmin) {
+      throw new Error('You are not Admin');
+    }
+    
     localStorage.setItem('mealToken', data.token);
     setUser({ _id: data._id, name: data.name, email: data.email, isAdmin: data.isAdmin });
     return data;

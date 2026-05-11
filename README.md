@@ -74,26 +74,15 @@ npm run seed
 npm run dev
 ```
 
-5. In a second terminal, start frontend:
-
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
-4. Install frontend dependencies:
+5. In a second terminal, install frontend dependencies and start the app:
 
 ```bash
 cd ../frontend
 npm install
-```
-
-5. Start frontend app:
-
-```bash
 npm run dev
 ```
+
+Note: if you run both servers from the root workspace via `npm run dev`, the frontend will start on `http://localhost:5001` and the backend will run on `http://localhost:5000`.
 
 6. Open the URL provided by Vite (usually `http://localhost:5173`).
 

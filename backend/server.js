@@ -7,6 +7,7 @@ const authRoutes = require('./routes/authRoutes');
 const mealRoutes = require('./routes/mealRoutes');
 const bazarRoutes = require('./routes/bazarRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
+const historyRoutes = require('./routes/historyRoutes');
 const { errorHandler } = require('./middleware/errorMiddleware');
 
 dotenv.config({ path: path.join(__dirname, '.env') });
@@ -21,6 +22,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/meals', mealRoutes);
 app.use('/api/bazar', bazarRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/history', historyRoutes);
 
 app.use(errorHandler);
 

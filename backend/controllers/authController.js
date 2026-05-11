@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const User = require('../models/User');
 const Meal = require('../models/Meal');
+const { addHistoryEntry } = require('./historyController');
 
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '7d' });
@@ -134,6 +135,16 @@ const deleteUser = async (req, res, next) => {
     await Meal.deleteMany({ userId: user._id });
     await user.remove();
 
+    // Track history
+    await addHistoryEntry(
+      'user_removed',
+      `Admin removed user ${user.name} (${user.email})`,
+      req.user._id,
+      req.user.name,
+      user._id,
+      user.name
+    );
+
     res.json({ message: 'User removed' });
   } catch (error) {
     next(error);
@@ -142,15 +153,27 @@ const deleteUser = async (req, res, next) => {
 
 const deleteAllUsers = async (req, res, next) => {
   try {
-    const members = await User.find({ isAdmin: false }).select('_id');
-    const memberIds = members.map((member) => member._id);
+    const members = await User.find({ isAdmin: false }).select('_id name email');
 
-    if (!memberIds.length) {
+    if (!members.length) {
       return res.json({ message: 'No non-admin members to delete' });
     }
 
+    const memberIds = members.map((member) => member._id);
     await Meal.deleteMany({ userId: { $in: memberIds } });
     await User.deleteMany({ _id: { $in: memberIds } });
+
+    // Track history for each deleted user
+    for (const member of members) {
+      await addHistoryEntry(
+        'user_removed_bulk',
+        `Admin performed bulk delete - removed user ${member.name} (${member.email})`,
+        req.user._id,
+        req.user.name,
+        member._id,
+        member.name
+      );
+    }
 
     res.json({ message: 'All non-admin members deleted' });
   } catch (error) {

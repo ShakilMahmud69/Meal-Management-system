@@ -13,12 +13,13 @@ export default function LoginPage({ onSwitch }) {
   const [newPassword, setNewPassword] = useState('');
   const [resetMessage, setResetMessage] = useState('');
   const [showTokenInput, setShowTokenInput] = useState(false);
+  const [isAdminLogin, setIsAdminLogin] = useState(false);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     setError('');
     try {
-      await login({ email, password });
+      await login({ email, password }, isAdminLogin);
     } catch (err) {
       setError(err.message);
     }
@@ -61,7 +62,24 @@ export default function LoginPage({ onSwitch }) {
     <div className="space-y-6">
       {!forgotMode ? (
         <>
-          <h2 className="text-2xl font-semibold">Login</h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-2xl font-semibold">{isAdminLogin ? 'Admin Login' : 'Login'}</h2>
+            <button
+              type="button"
+              onClick={() => setIsAdminLogin(!isAdminLogin)}
+              className={`flex items-center gap-2 px-3 py-2 rounded-2xl text-sm font-semibold transition-colors ${
+                isAdminLogin
+                  ? 'bg-cyan-500 text-slate-950 hover:bg-cyan-400'
+                  : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+              }`}
+              title={isAdminLogin ? 'Switch to regular login' : 'Switch to admin login'}
+            >
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+              </svg>
+              {isAdminLogin ? 'Admin' : 'User'}
+            </button>
+          </div>
           {error && <div className="rounded-2xl bg-red-500/20 px-4 py-3 text-red-200">{error}</div>}
           <form className="space-y-4" onSubmit={handleSubmit}>
             <label className="block space-y-2 text-sm text-slate-300">
@@ -73,17 +91,17 @@ export default function LoginPage({ onSwitch }) {
               <input value={password} onChange={(e) => setPassword(e.target.value)} type="password" placeholder="Enter password" />
             </label>
             <button type="submit" className="w-full rounded-2xl bg-cyan-500 px-4 py-3 font-semibold text-slate-950 hover:bg-cyan-400">
-              Login
+              {isAdminLogin ? 'Login as Admin' : 'Login'}
             </button>
           </form>
           <div className="flex items-center justify-between gap-4 text-sm text-slate-400">
             <p>
               Don't have an account?{' '}
-              <button onClick={onSwitch} className="text-cyan-300 hover:text-cyan-100">
+              <button type="button" onClick={onSwitch} className="text-cyan-300 hover:text-cyan-100">
                 Sign up
               </button>
             </p>
-            <button onClick={() => setForgotMode(true)} className="text-cyan-300 hover:text-cyan-100">
+            <button type="button" onClick={() => setForgotMode(true)} className="text-cyan-300 hover:text-cyan-100">
               Forgot password?
             </button>
           </div>
@@ -121,7 +139,7 @@ export default function LoginPage({ onSwitch }) {
               <p className="mt-2 text-slate-400 text-sm">Copy this token into the form above to reset your password.</p>
             </div>
           )}
-          <button onClick={() => { setForgotMode(false); setError(''); setResetMessage(''); setShowTokenInput(false); setResetToken(''); }} className="text-cyan-300 hover:text-cyan-100">
+          <button type="button" onClick={() => { setForgotMode(false); setError(''); setResetMessage(''); setShowTokenInput(false); setResetToken(''); }} className="text-cyan-300 hover:text-cyan-100">
             Back to login
           </button>
         </>

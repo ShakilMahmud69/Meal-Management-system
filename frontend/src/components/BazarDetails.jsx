@@ -7,7 +7,7 @@ export default function BazarDetails({ bazars, mealRate, totalCost, totalMeals }
           <p className="text-slate-400">Track bazar items and calculate meal rate.</p>
         </div>
         <div className="rounded-3xl bg-slate-800 px-4 py-3 text-sm text-slate-300">
-          Meal rate: ${mealRate.toFixed(2)}
+          Meal rate: ৳{mealRate.toFixed(2)}
         </div>
       </div>
 
@@ -18,11 +18,11 @@ export default function BazarDetails({ bazars, mealRate, totalCost, totalMeals }
         </div>
         <div className="rounded-3xl bg-slate-800 p-4">
           <p className="text-sm text-slate-400">Total bazar</p>
-          <p className="mt-3 text-3xl font-semibold text-white">${totalCost.toFixed(2)}</p>
+          <p className="mt-3 text-3xl font-semibold text-white">৳{totalCost.toFixed(2)}</p>
         </div>
         <div className="rounded-3xl bg-slate-800 p-4">
           <p className="text-sm text-slate-400">Meal rate</p>
-          <p className="mt-3 text-3xl font-semibold text-white">${mealRate.toFixed(2)}</p>
+          <p className="mt-3 text-3xl font-semibold text-white">৳{mealRate.toFixed(2)}</p>
         </div>
       </div>
 
@@ -32,7 +32,7 @@ export default function BazarDetails({ bazars, mealRate, totalCost, totalMeals }
             <tr>
               <th className="border-b border-slate-700 px-4 py-3">Date</th>
               <th className="border-b border-slate-700 px-4 py-3">Item</th>
-              <th className="border-b border-slate-700 px-4 py-3 text-right">Price</th>
+              <th className="border-b border-slate-700 px-4 py-3 text-right">Price (৳)</th>
             </tr>
           </thead>
           <tbody>
@@ -47,7 +47,7 @@ export default function BazarDetails({ bazars, mealRate, totalCost, totalMeals }
                 <tr key={`${item._id}`} className="border-b border-slate-800 last:border-none">
                   <td className="px-4 py-3">{item.date}</td>
                   <td className="px-4 py-3">{item.itemName}</td>
-                  <td className="px-4 py-3 text-right">${item.price.toFixed(2)}</td>
+                  <td className="px-4 py-3 text-right">৳{item.price.toFixed(2)}</td>
                 </tr>
               ))
             )}

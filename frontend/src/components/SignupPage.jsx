@@ -41,7 +41,7 @@ export default function SignupPage({ onSwitch }) {
       </form>
       <p className="text-sm text-slate-400">
         Already have an account?{' '}
-        <button onClick={onSwitch} className="text-cyan-300 hover:text-cyan-100">
+        <button type="button" onClick={onSwitch} className="text-cyan-300 hover:text-cyan-100">
           Login
         </button>
       </p>

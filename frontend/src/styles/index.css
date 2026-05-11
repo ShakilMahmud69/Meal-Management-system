@@ -13,3 +13,46 @@ button {
 input, select {
   @apply w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-2 text-slate-100 outline-none focus:border-cyan-500;
 }
+
+/* Fast custom tooltip */
+.meal-tooltip {
+  position: relative;
+}
+
+.meal-tooltip::before {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 110%;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(0, 0, 0, 0.9);
+  color: #e2e8f0;
+  padding: 6px 12px;
+  border-radius: 6px;
+  white-space: nowrap;
+  font-size: 12px;
+  font-weight: 500;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.05s ease-in-out;
+  z-index: 1000;
+}
+
+.meal-tooltip::after {
+  content: '';
+  position: absolute;
+  bottom: 102%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: rgba(0, 0, 0, 0.9);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.05s ease-in-out;
+  z-index: 1000;
+}
+
+.meal-tooltip:hover::before,
+.meal-tooltip:hover::after {
+  opacity: 1;
+}

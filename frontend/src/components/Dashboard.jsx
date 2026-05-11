@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { getDashboard, updateMeal, createUser, deleteUser } from '../api';
+import { getDashboard, updateMeal, createUser, deleteUser, deleteAllUsers } from '../api';
 import MealTable from './MealTable';
 import SummaryCards from './SummaryCards';
 import BazarForm from './BazarForm';
 import MealDateForm from './MealDateForm';
 import BazarDetails from './BazarDetails';
+import History from './History';
 
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
@@ -33,6 +34,7 @@ export default function Dashboard() {
   const [memberPassword, setMemberPassword] = useState('');
   const [memberMessage, setMemberMessage] = useState('');
   const [selectedMonth, setSelectedMonth] = useState(getMonthKey(new Date()));
+  const [showHistory, setShowHistory] = useState(false);
 
   const loadDashboard = async () => {
     setLoading(true);
@@ -96,9 +98,24 @@ export default function Dashboard() {
     const lunch = mealType === 'lunch' ? (currentValue ? 0 : 1) : row?.lunch || 0;
     const dinner = mealType === 'dinner' ? (currentValue ? 0 : 1) : row?.dinner || 0;
 
+    // Save current scroll position
+    const scrollPosition = window.scrollY;
+
     try {
       await updateMeal({ date, lunch, dinner, userId });
-      await loadDashboard();
+      
+      // Silently fetch updated data without showing loading state
+      try {
+        const data = await getDashboard();
+        setDashboard(data);
+      } catch (err) {
+        setError(err.message);
+      }
+      
+      // Use setTimeout to restore scroll after React re-render completes
+      setTimeout(() => {
+        window.scrollTo(0, scrollPosition);
+      }, 0);
     } catch (err) {
       setError(err.message);
     }
@@ -172,7 +189,20 @@ export default function Dashboard() {
         <div className="flex flex-col gap-2 sm:flex-row">
           <span className="rounded-3xl bg-slate-800 px-4 py-3 text-sm text-slate-300">Signed in as {user.name}</span>
           {user.isAdmin && <span className="rounded-3xl bg-cyan-500 px-4 py-3 text-sm font-semibold text-slate-950">Admin</span>}
-          <button onClick={logout} className="rounded-3xl bg-rose-500 px-4 py-3 text-sm font-semibold text-white hover:bg-rose-400">
+          {user.isAdmin && (
+            <button
+              type="button"
+              onClick={() => setShowHistory(true)}
+              className="flex items-center gap-2 rounded-3xl bg-slate-800 px-4 py-3 text-sm text-slate-300 hover:bg-slate-700 transition-colors"
+              title="View modification history"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              History
+            </button>
+          )}
+          <button type="button" onClick={logout} className="rounded-3xl bg-rose-500 px-4 py-3 text-sm font-semibold text-white hover:bg-rose-400">
             Logout
           </button>
         </div>
@@ -184,10 +214,10 @@ export default function Dashboard() {
           <p className="mt-2 text-2xl font-semibold text-white">{formatMonthLabel(selectedMonth)}</p>
         </div>
         <div className="flex gap-3">
-          <button onClick={() => handleChangeMonth(-1)} className="rounded-3xl bg-slate-800 px-5 py-3 text-sm text-white hover:bg-slate-700">
+          <button type="button" onClick={() => handleChangeMonth(-1)} className="rounded-3xl bg-slate-800 px-5 py-3 text-sm text-white hover:bg-slate-700">
             Previous month
           </button>
-          <button onClick={() => handleChangeMonth(1)} className="rounded-3xl bg-cyan-500 px-5 py-3 text-sm font-semibold text-slate-950 hover:bg-cyan-400">
+          <button type="button" onClick={() => handleChangeMonth(1)} className="rounded-3xl bg-cyan-500 px-5 py-3 text-sm font-semibold text-slate-950 hover:bg-cyan-400">
             Next month
           </button>
         </div>
@@ -204,7 +234,7 @@ export default function Dashboard() {
                 <div key={summary._id} className="rounded-3xl border border-slate-700 bg-slate-800 p-4">
                   <p className="font-semibold text-white">{summary.name}</p>
                   <p className="mt-2 text-slate-400">Meals: {summary.totalMeals}</p>
-                  <p className="mt-1 text-cyan-300">Estimated cost: ${summary.cost.toFixed(2)}</p>
+                  <p className="mt-1 text-cyan-300">Estimated cost: ৳{summary.cost.toFixed(2)}</p>
                 </div>
               ))}
             </div>
@@ -268,6 +298,7 @@ export default function Dashboard() {
                     <p className="text-slate-400 text-sm">You can remove members one by one or delete all non-admin members.</p>
                   </div>
                   <button
+                    type="button"
                     onClick={handleDeleteAllMembers}
                     className="rounded-2xl bg-rose-500 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-400"
                   >
@@ -282,6 +313,7 @@ export default function Dashboard() {
                         <p className="text-slate-400 text-sm">{member.email}</p>
                       </div>
                       <button
+                        type="button"
                         onClick={() => handleRemoveMember(member._id)}
                         disabled={member._id === user._id}
                         className="rounded-2xl bg-rose-500 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-400 disabled:cursor-not-allowed disabled:bg-slate-700"
@@ -299,6 +331,8 @@ export default function Dashboard() {
           <BazarDetails bazars={monthlyBazars} mealRate={monthlyMealRate} totalCost={monthlyTotalCost} totalMeals={monthlyTotalMeals} />
         </div>
       </section>
+
+      <History isVisible={showHistory} onClose={() => setShowHistory(false)} />
     </div>
   );
 }

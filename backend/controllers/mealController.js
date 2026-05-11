@@ -1,16 +1,43 @@
 const Meal = require('../models/Meal');
 const User = require('../models/User');
+const { addHistoryEntry } = require('./historyController');
 
 const createOrUpdateMeal = async (req, res, next) => {
   try {
     const { date, lunch, dinner, userId: requestedUserId } = req.body;
     const userId = req.user.isAdmin && requestedUserId ? requestedUserId : req.user._id;
 
+    // Get the existing meal to track changes
+    const existingMeal = await Meal.findOne({ userId, date });
+
     const meal = await Meal.findOneAndUpdate(
       { userId, date },
       { lunch, dinner },
       { new: true, upsert: true, setDefaultsOnInsert: true }
     );
+
+    // Track history if this is an admin modifying someone else's meal or if values changed
+    if (req.user.isAdmin && requestedUserId && requestedUserId !== req.user._id.toString()) {
+      const targetUser = await User.findById(requestedUserId);
+      const oldLunch = existingMeal ? existingMeal.lunch : 0;
+      const oldDinner = existingMeal ? existingMeal.dinner : 0;
+
+      if (oldLunch !== lunch || oldDinner !== dinner) {
+        await addHistoryEntry(
+          'meal_update',
+          `Admin modified ${targetUser.name}'s meal for ${date}`,
+          req.user._id,
+          req.user.name,
+          targetUser._id,
+          targetUser.name,
+          {
+            date,
+            oldValues: { lunch: oldLunch, dinner: oldDinner },
+            newValues: { lunch, dinner }
+          }
+        );
+      }
+    }
 
     res.json(meal);
   } catch (error) {

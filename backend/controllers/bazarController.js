@@ -1,4 +1,5 @@
 const Bazar = require('../models/Bazar');
+const { addHistoryEntry } = require('./historyController');
 
 const addBazarItem = async (req, res, next) => {
   try {
@@ -9,6 +10,18 @@ const addBazarItem = async (req, res, next) => {
     }
 
     const bazar = await Bazar.create({ date, itemName, price });
+
+    // Track history
+    await addHistoryEntry(
+      'bazar_added',
+      `Added bazar item: ${itemName} (${price} Taka) for ${date}`,
+      req.user._id,
+      req.user.name,
+      null,
+      null,
+      { date, itemName, price }
+    );
+
     res.status(201).json(bazar);
   } catch (error) {
     next(error);
